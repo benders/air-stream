@@ -1,11 +1,11 @@
 # TODO
 
 * Smaller font
-* Dial controls brightness
 * Show bootup progress before connecting
-* Colors based on AQI
 * Some kind of time / freshness indicator
 * Set WiFi network
+* Use 10 minute average reading
+* Support local sensor access
 
 ## External libraries
 https://github.com/adafruit/micropython-adafruit-bitmap-font/blob/master/bitmapfont.py

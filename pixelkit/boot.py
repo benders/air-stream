@@ -5,16 +5,15 @@
 #import webrepl
 #webrepl.start()
 
-import config
-
 def do_connect():
     import machine
     import network
+    import config
     wlan = network.WLAN()
     wlan.active(True)
     if not wlan.isconnected():
-        print('connecting to network...')
-        wlan.connect(CONFIG['ssid'], CONFIG['psk'])
+        print('connecting to network... ' + config.CONFIG['ssid'])
+        wlan.connect(config.CONFIG['ssid'], config.CONFIG['psk'])
         while not wlan.isconnected():
             machine.idle()
     print('network config:', wlan.ipconfig('addr4'))
