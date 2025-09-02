@@ -11,6 +11,14 @@ import sys
 import json
 import urequests
 
+WHITE = (255,255,255)
+GREEN  = (0, 228, 0)
+YELLOW = (255, 255, 0)
+ORANGE = (255, 126, 0)
+RED   = (255, 0, 0)
+PURPLE = (143, 63, 151)
+MAROON = (126, 0, 35)
+
 def url_encode(string):
     encoded_string = ""
     for character in string:
@@ -168,6 +176,22 @@ def aqiFromPM(pm):
     else:
         return 'undefined'
 
+def aqiColor(aqi):
+    if aqi > 300.5:
+        return MAROON
+    elif aqi > 201.5:
+        return PURPLE
+    elif aqi > 151.5:
+        return RED
+    elif aqi > 101.5:
+        return ORANGE
+    elif aqi > 51.5:
+        return YELLOW
+    elif aqi > 0:
+        return GREEN
+    else:
+        return WHITE
+
 
 # Calculate AQI from standard ranges
 def calcAQI(Cp, Ih, Il, BPh, BPl):
@@ -177,24 +201,3 @@ def calcAQI(Cp, Ih, Il, BPh, BPl):
     return round((a / b) * c + Il)
 
 
-def main():
-    """
-    Main function to execute the script.
-    """
-    # Get the directory of the script
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Path to the config file
-    config_path = os.path.join(script_dir, "config.yml")
-
-    # Load configuration
-    config = load_config(config_path)
-
-    # Fetch sensor data
-    sensor_data = fetch_sensor_data(config["api_key"], config["sensor_id"])
-
-    # Display the data
-    display_sensor_data(sensor_data)
-
-if __name__ == "__main__":
-    main()

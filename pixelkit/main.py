@@ -1,21 +1,45 @@
-# Write your code here :-)
-import PixelKit as kit
+# Standard libraries
 import time
+
+# Local libraries
+import PixelKit as kit
+import bitmapfont
+
+# Custom code
 import config
+import purpleair
 
 def fetch_dial():
     dial = kit.dial.read()
-    return round(dial / 4096.0 * 99)
+    return (dial / 4096.0)
 
-def fetch_temp():
-    import esp32
-    return esp32.raw_temperature()
+def screen_test():
+    colors = [
+        purpleair.WHITE,
+        purpleair.GREEN,
+        purpleair.YELLOW,
+        purpleair.ORANGE,
+        purpleair.RED,
+        purpleair.PURPLE,
+        purpleair.MAROON,
+        (0,0,0)
+    ]
+    for h in range(0,kit.HEIGHT):
+        row_color = adjust_color(fetch_dial(), colors[h])
+        for w in range(0,kit.WIDTH):
+            kit.set_pixel(w,h,row_color)
+        kit.render()
+        time.sleep(0.1)
 
-import purpleair
+def adjust_color(brightness: float, color: tuple) -> tuple:
+    if not 0 <= brightness <= 1.0:
+        raise ValueError("Factor must be between 0 and 1.0")
+    return tuple(int(val * brightness) for val in color)
 
-import bitmapfont
 
-bf = bitmapfont.BitmapFont(16,8, kit.set_pixel)
+screen_test()
+
+bf = bitmapfont.BitmapFont(kit.WIDTH, kit.HEIGHT, kit.set_pixel)
 bf.init()
 
 while True:
@@ -25,13 +49,11 @@ while True:
     sensor = sensor_data.get("sensor", {})
     pm25 = sensor.get("pm2.5_a")
     aqi = purpleair.aqiFromPM(pm25)
+    color = purpleair.aqiColor(aqi)
+    color = adjust_color(fetch_dial(), color)
 
     value_string = "%d" % aqi
     kit.clear()
-    bf.text(value_string, 0, 0, (0, 0, 0x10))
+    bf.text(value_string, 0, 0, color)
     kit.render()
     time.sleep(600)
-
-# from neopixel_matrix import NeoPixelMatrix, Color
-# np_matrix = NeoPixelMatrix(pin=kit.NEOPIXEL_PIN, width=16, height=8, direction=NeoPixelMatrix.HORIZONTAL, brightness=0.1)
-# np_matrix.text("0", 0, 0, color=Color.BLUE)
