@@ -62,7 +62,7 @@ while True:
         sensor_data = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"])
         purpleair.display_sensor_data(sensor_data)
         sensor = sensor_data.get("sensor", {})
-        pm25 = sensor.get("pm2.5_a")
+        pm25 = sensor.get("pm2.5")
         aqi = purpleair.aqiFromPM(pm25)
         raw_color = purpleair.aqiColor(aqi)
 
