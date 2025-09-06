@@ -26,7 +26,6 @@ MICROPHONE_PIN = 39
 # Objects representing the available hardware on the PixelKit
 neopixel_pin = Pin(NEOPIXEL_PIN, Pin.OUT)
 np = NeoPixel(neopixel_pin, SIZE)
-np.timing = 1 # This will set the neopixel frequency correctly
 joystick_up = Pin(JOYSTICK_UP_PIN, Pin.IN)
 joystick_down = Pin(JOYSTICK_DOWN_PIN, Pin.IN)
 joystick_left = Pin(JOYSTICK_LEFT_PIN, Pin.IN)
