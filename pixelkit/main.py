@@ -13,7 +13,7 @@ import purpleair
 
 def fetch_dial():
     dial = kit.dial.read()
-    return (dial / 5120.0 + 0.1)
+    return (dial / 8192.0 + 0.05)
 
 def screen_test():
     colors = [
