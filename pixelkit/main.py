@@ -60,6 +60,7 @@ while True:
         last_updated_ticks = time.ticks_ms()
 
         sensor_data = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"])
+        print(sensor_data)
         purpleair.display_sensor_data(sensor_data)
         sensor = sensor_data.get("sensor", {})
         pm25 = sensor.get("pm2.5")

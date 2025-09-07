@@ -51,7 +51,8 @@ def fetch_sensor_data(api_key, sensor_id):
     # Fields to request from the API (can be customized based on needs)
     params = {
         # "fields": "name,latitude,longitude,altitude,humidity,temperature,pressure,last_seen,pm2.5_a,pm2.5_10minute_a,confidence"
-        "fields": "name,humidity,temperature,pressure,last_seen,pm2.5,pm2.5_10minute,confidence"
+        # "fields": "name,humidity,temperature,pressure,last_seen,pm2.5,pm2.5_10minute,confidence"
+        "fields": "last_seen,pm2.5,confidence"
     }
 
     param_string = "fields=" + url_encode(params["fields"])
@@ -104,32 +105,32 @@ def display_sensor_data(data):
         # altitude = sensor.get("altitude")
 
         # Extract environmental readings
-        humidity = sensor.get("humidity")
-        temperature = sensor.get("temperature")
-        pressure = sensor.get("pressure")
+        # humidity = sensor.get("humidity")
+        # temperature = sensor.get("temperature")
+        # pressure = sensor.get("pressure")
 
         # Extract PM2.5 readings
         pm25 = sensor.get("pm2.5")
-        pm25_10minute = sensor.get("pm2.5_10minute")
+        # pm25_10minute = sensor.get("pm2.5_10minute")
 
         # Extract confidence value
         confidence = sensor.get("confidence")
 
         # Display the information
         print("\n=== PurpleAir Sensor Data ===")
-        print(f"Sensor Name: {name}")
+        # print(f"Sensor Name: {name}")
         #print(f"Last Updated: {last_seen}")
         # print("\n--- Location ---")
         # print(f"Latitude: {latitude}")
         # print(f"Longitude: {longitude}")
         # print(f"Altitude: {altitude} meters")
-        print("\n--- Environmental Conditions ---")
-        print(f"Humidity: {humidity}%")
-        print(f"Temperature: {temperature}°C")
-        print(f"Pressure: {pressure} hPa")
+        # print("\n--- Environmental Conditions ---")
+        # print(f"Humidity: {humidity}%")
+        # print(f"Temperature: {temperature}°C")
+        # print(f"Pressure: {pressure} hPa")
         print("\n--- Air Quality (PM2.5) ---")
         print(f"Current pm2.5: {pm25} µg/m³")
-        print(f"Average pm2.5: {pm25_10minute} µg/m³")
+        # print(f"Average pm2.5: {pm25_10minute} µg/m³")
         print(f"Current AQI from pm2.5: {aqiFromPM(pm25)}")
         print(f"Confidence: {confidence}%")
         print("\n================================")
