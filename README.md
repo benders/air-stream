@@ -28,6 +28,12 @@ esptool erase_flash
 esptool write_flash 0x1000 ~/Downloads/ESP32_GENERIC-20250809-v1.26.0.bin
 ```
 
+## Install MicroPython Stubs
+```sh
+# Install stubs for a specific version.
+pip install -U micropython-esp32-stubs~=1.26.0 --target typings --no-user
+```
+
 ## External libraries
 * https://github.com/adafruit/micropython-adafruit-bitmap-font/blob/master/bitmapfont.py
 * mpremote mip install ntptime
