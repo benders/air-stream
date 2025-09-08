@@ -28,7 +28,7 @@ def url_encode(string):
             encoded_string += f"%{ord(character):x}"
     return encoded_string
 
-def fetch_sensor_data(api_key, sensor_id):
+def fetch_sensor_data(api_key, sensor_id, field_list):
     """
     Fetch data for a specific sensor from PurpleAir API.
 
@@ -48,14 +48,14 @@ def fetch_sensor_data(api_key, sensor_id):
         "Content-Type": "application/json"
     }
 
-    # Fields to request from the API (can be customized based on needs)
-    params = {
-        # "fields": "name,latitude,longitude,altitude,humidity,temperature,pressure,last_seen,pm2.5_a,pm2.5_10minute_a,confidence"
-        # "fields": "name,humidity,temperature,pressure,last_seen,pm2.5,pm2.5_10minute,confidence"
-        "fields": "last_seen,pm2.5,confidence"
-    }
+    if isinstance(field_list, list):
+        fields = ','.join(field_list)
+    elif isinstance(field_list, str):
+        fields = field_list
+    else:
+        raise ValueError("field_list must be a list or a string")
 
-    param_string = "fields=" + url_encode(params["fields"])
+    param_string = "fields=" + url_encode(fields)
 
     try:
         print(f"Fetching data for sensor {sensor_id}")
@@ -70,75 +70,6 @@ def fetch_sensor_data(api_key, sensor_id):
     except ValueError as e:
         print(f"Request error: {e}")
         sys.exit(1)
-
-def format_timestamp(timestamp):
-    """
-    Convert Unix timestamp to human-readable date/time.
-
-    Args:
-        timestamp (int): Unix timestamp
-
-    Returns:
-        str: Formatted date and time
-    """
-    if timestamp:
-        return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
-    return "N/A"
-
-def display_sensor_data(data):
-    """
-    Display formatted sensor data.
-
-    Args:
-        data (dict): Sensor data from PurpleAir API
-    """
-    try:
-        sensor = data.get("sensor", {})
-
-        # Extract basic information
-        name = sensor.get("name", "Unknown")
-        # last_seen = format_timestamp(sensor.get("last_seen"))
-
-        # Extract location data
-        # latitude = sensor.get("latitude")
-        # longitude = sensor.get("longitude")
-        # altitude = sensor.get("altitude")
-
-        # Extract environmental readings
-        # humidity = sensor.get("humidity")
-        # temperature = sensor.get("temperature")
-        # pressure = sensor.get("pressure")
-
-        # Extract PM2.5 readings
-        pm25 = sensor.get("pm2.5")
-        # pm25_10minute = sensor.get("pm2.5_10minute")
-
-        # Extract confidence value
-        confidence = sensor.get("confidence")
-
-        # Display the information
-        print("\n=== PurpleAir Sensor Data ===")
-        # print(f"Sensor Name: {name}")
-        #print(f"Last Updated: {last_seen}")
-        # print("\n--- Location ---")
-        # print(f"Latitude: {latitude}")
-        # print(f"Longitude: {longitude}")
-        # print(f"Altitude: {altitude} meters")
-        # print("\n--- Environmental Conditions ---")
-        # print(f"Humidity: {humidity}%")
-        # print(f"Temperature: {temperature}°C")
-        # print(f"Pressure: {pressure} hPa")
-        print("\n--- Air Quality (PM2.5) ---")
-        print(f"Current pm2.5: {pm25} µg/m³")
-        # print(f"Average pm2.5: {pm25_10minute} µg/m³")
-        print(f"Current AQI from pm2.5: {aqiFromPM(pm25)}")
-        print(f"Confidence: {confidence}%")
-        print("\n================================")
-
-    except KeyError as e:
-        print(f"Error parsing API response: {e}")
-        print("Could not parse all sensor data. Response format may have changed.")
-        print("Raw data:", json.dumps(data, indent=2))
 
 # Convert US AQI from raw pm2.5 data
 def aqiFromPM(pm):

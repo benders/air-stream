@@ -1,5 +1,6 @@
 # Standard libraries
 import time
+import json
 
 # Local libraries
 import PixelKit as kit
@@ -9,6 +10,7 @@ import ntptime
 # Custom code
 import config
 import purpleair
+import utils
 
 
 def fetch_dial():
@@ -38,39 +40,102 @@ def adjust_color(brightness: float, color: tuple) -> tuple:
         raise ValueError("Factor must be between 0 and 1.0")
     return tuple(int(val * brightness) for val in color)
 
+def display_sensor_metadata(data):
+    try:
+        sensor = data.get("sensor", {})
 
-screen_test()
+        # Extract basic information
+        name = sensor.get("name", "Unknown")
+        last_seen_utc = time.gmtime(sensor.get("last_seen"))
+        last_seen = utils.format_time(last_seen_utc)
 
-# Initialize the RTC
-ntptime.settime()
+        # Display the information
+        print("\n=== PurpleAir Sensor Metadata ===")
+        print(f"Last Updated: {last_seen} (UTC)")
+        print(f"Sensor Name: {name}")
+        print("\n--- Location ---")
+        print(f"Latitude: {sensor.get("latitude")}")
+        print(f"Longitude: {sensor.get("longitude")}")
+        print(f"Altitude: {sensor.get("altitude")} meters")
+        print("================================\n")
 
-bf = bitmapfont.BitmapFont(kit.WIDTH, kit.HEIGHT, kit.set_pixel)
-bf.init()
+    except KeyError as e:
+        print(f"Error parsing API response: {e}")
+        print("Could not parse all sensor data. Response format may have changed.")
+        print("Raw data:", json.dumps(data, indent=2))
 
-UPDATE_DELAY_SEC = 600
-last_updated_ticks = UPDATE_DELAY_SEC * 1000 * -1
 
-aqi = 999
-raw_color = purpleair.WHITE
+def display_sensor_data(data):
+    try:
+        sensor = data.get("sensor", {})
 
-while True:
-    # Refresh the sensor data if it is stale
-    if time.ticks_diff(time.ticks_ms(), last_updated_ticks) > (UPDATE_DELAY_SEC * 1000):
-        print("Updating data at ", time.gmtime())
-        last_updated_ticks = time.ticks_ms()
+        last_seen_utc = time.gmtime(sensor.get("last_seen"))
+        last_seen = utils.format_time(last_seen_utc)
 
-        sensor_data = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"])
-        print(sensor_data)
-        purpleair.display_sensor_data(sensor_data)
-        sensor = sensor_data.get("sensor", {})
         pm25 = sensor.get("pm2.5")
-        aqi = purpleair.aqiFromPM(pm25)
-        raw_color = purpleair.aqiColor(aqi)
+        confidence = sensor.get("confidence")
 
-    color = adjust_color(fetch_dial(), raw_color)
+        print("\n=== PurpleAir Sensor Data ===")
+        print(f"Last Updated: {last_seen} (UTC)")
+        # print("\n--- Environmental Conditions ---")
+        # print(f"Humidity: {humidity}%")
+        # print(f"Temperature: {temperature}°C")
+        # print(f"Pressure: {pressure} hPa")
+        print("\n--- Air Quality (PM2.5) ---")
+        print(f"Current pm2.5: {pm25} µg/m³")
+        print(f"Current AQI from pm2.5: {purpleair.aqiFromPM(pm25)}")
+        print(f"Confidence: {confidence}%")
+        print("================================\n")
 
-    value_string = "%d" % aqi
-    kit.clear()
-    bf.text(value_string, 0, 0, color)
-    kit.render()
-    time.sleep(0.1)
+    except KeyError as e:
+        print(f"Error parsing API response: {e}")
+        print("Could not parse all sensor data. Response format may have changed.")
+        print("Raw data:", json.dumps(data, indent=2))
+
+#
+# Initialize, then run forever
+#
+
+if __name__ == "__main__":
+    screen_test()
+
+    # Initialize the RTC
+    # ntptime.settime()
+
+    bf = bitmapfont.BitmapFont(kit.WIDTH, kit.HEIGHT, kit.set_pixel)
+    bf.init()
+
+    METADATA_FIELDS = ["name", "latitude", "longitude", "altitude", "last_seen"]
+    # AIR_QUALITY_FIELDS = ["pm2.5", "confidence", "humidity", "temperature", "pressure"]
+    AIR_QUALITY_FIELDS = ["pm2.5", "confidence", "last_seen"]
+
+    sensor_metadata = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"], METADATA_FIELDS)
+    print(sensor_metadata)
+    display_sensor_metadata(sensor_metadata)
+
+    UPDATE_DELAY_SEC = 120
+    last_updated_ticks = UPDATE_DELAY_SEC * 1000 * -1
+
+    aqi = 999
+    raw_color = purpleair.WHITE
+
+    while True:
+        # Refresh the sensor data if it is stale
+        if time.ticks_diff(time.ticks_ms(), last_updated_ticks) > (UPDATE_DELAY_SEC * 1000):
+            last_updated_ticks = time.ticks_ms()
+
+            sensor_data = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"], AIR_QUALITY_FIELDS)
+            print(sensor_data)
+            display_sensor_data(sensor_data)
+            sensor = sensor_data.get("sensor", {})
+            pm25 = sensor.get("pm2.5")
+            aqi = purpleair.aqiFromPM(pm25)
+            raw_color = purpleair.aqiColor(aqi)
+
+        color = adjust_color(fetch_dial(), raw_color)
+
+        value_string = "%d" % aqi
+        kit.clear()
+        bf.text(value_string, 0, 0, color)
+        kit.render()
+        time.sleep(0.1)
