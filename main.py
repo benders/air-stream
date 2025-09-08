@@ -1,6 +1,7 @@
 # Standard libraries
 import time
 import json
+import urandom
 
 # Local libraries
 import PixelKit as kit
@@ -51,7 +52,7 @@ def display_sensor_metadata(data):
 
         # Display the information
         print("\n=== PurpleAir Sensor Metadata ===")
-        print(f"Last Updated: {last_seen} (UTC)")
+        print(f"Sensor Updated: {last_seen} (UTC)")
         print(f"Sensor Name: {name}")
         print("\n--- Location ---")
         print(f"Latitude: {sensor.get("latitude")}")
@@ -68,15 +69,19 @@ def display_sensor_metadata(data):
 def display_sensor_data(data):
     try:
         sensor = data.get("sensor", {})
+        time_stamp = data.get("time_stamp")
 
-        last_seen_utc = time.gmtime(sensor.get("last_seen"))
-        last_seen = utils.format_time(last_seen_utc)
+        last_seen_stamp = sensor.get("last_seen")
+        last_seen = utils.format_time(time.gmtime(last_seen_stamp))
+
+        age = time_stamp - last_seen_stamp
 
         pm25 = sensor.get("pm2.5")
         confidence = sensor.get("confidence")
 
         print("\n=== PurpleAir Sensor Data ===")
-        print(f"Last Updated: {last_seen} (UTC)")
+        print(f"Sensor Updated: {last_seen} (UTC)")
+        print(f"{age} seconds ago")
         # print("\n--- Environmental Conditions ---")
         # print(f"Humidity: {humidity}%")
         # print(f"Temperature: {temperature}°C")
@@ -114,16 +119,14 @@ if __name__ == "__main__":
     display_sensor_metadata(sensor_metadata)
 
     UPDATE_DELAY_SEC = 120
-    last_updated_ticks = UPDATE_DELAY_SEC * 1000 * -1
-
+    deadline = 0
+    
     aqi = 999
     raw_color = purpleair.WHITE
 
     while True:
         # Refresh the sensor data if it is stale
-        if time.ticks_diff(time.ticks_ms(), last_updated_ticks) > (UPDATE_DELAY_SEC * 1000):
-            last_updated_ticks = time.ticks_ms()
-
+        if time.ticks_diff(time.ticks_ms(), deadline) > 0:
             sensor_data = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"], AIR_QUALITY_FIELDS)
             print(sensor_data)
             display_sensor_data(sensor_data)
@@ -131,6 +134,11 @@ if __name__ == "__main__":
             pm25 = sensor.get("pm2.5")
             aqi = purpleair.aqiFromPM(pm25)
             raw_color = purpleair.aqiColor(aqi)
+
+            # Set new deadline
+            deadline = time.ticks_add(time.ticks_ms(), UPDATE_DELAY_SEC * 1000)
+            deadline = time.ticks_add(deadline, urandom.randrange(0, 30 * 1000))
+            print(f"Update in {time.ticks_diff(deadline, time.ticks_ms()) / 1000} seconds")
 
         color = adjust_color(fetch_dial(), raw_color)
 
