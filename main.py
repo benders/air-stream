@@ -140,7 +140,7 @@ if __name__ == "__main__":
 
         color = adjust_color(fetch_dial(), raw_color)
 
-        value_string = "%d" % aqi
+        value_string = "%3d" % aqi
         kit.clear()
         bf.text(value_string, 0, 0, color)
         kit.render()

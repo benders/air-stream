@@ -12,6 +12,17 @@ class Font4x7(BaseFont):
     WIDTH = 4
     HEIGHT = 7
     FONT = {
+        # 0x20  (space)
+        " ": [
+            "    ",
+            "    ",
+            "    ",
+            "    ",
+            "    ",
+            "    ",
+            "    ",
+        ],
+
         # 0x30  0
         "0": [
             " ## ",

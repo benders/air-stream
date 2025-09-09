@@ -12,6 +12,15 @@ class Font3x5(BaseFont):
     WIDTH = 3
     HEIGHT = 5
     FONT = {
+        # 0x20  (space)
+        " ": [
+            "   ",
+            "   ",
+            "   ",
+            "   ",
+            "   ",
+        ],
+
         # 0x30  0
         "0": [
             "###",
