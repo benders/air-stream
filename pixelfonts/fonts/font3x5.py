@@ -111,16 +111,3 @@ class Font3x5(BaseFont):
             "###",
         ]
     }
-
-if __name__ == "__main__":
-    import PixelKit as kit
-    
-    COLOR = (0x10, 0x10, 0x10)
-    DISPLAY_WIDTH = 16
-    DISPLAY_HEIGHT = 8
-    
-    font = Font3x5(DISPLAY_WIDTH, DISPLAY_HEIGHT, kit.set_pixel)
-    
-    kit.clear()
-    font.text("6789", 0, 0, COLOR)
-    kit.render()
