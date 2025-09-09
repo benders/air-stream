@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env micropython
 """
 Example usage of the pixelfont package.
 """
@@ -67,7 +67,7 @@ def demo_scrolling():
     SCROLL_TEXT = "0123456789"
     SCROLL_SPEED = 0.2  # seconds between updates
     
-    font = Font3x5(DISPLAY_WIDTH, DISPLAY_HEIGHT, kit.set_pixel)
+    font = Font4x7(DISPLAY_WIDTH, DISPLAY_HEIGHT, kit.set_pixel)
     
     # Calculate the total width of the text
     text_width = len(SCROLL_TEXT) * (font.WIDTH + 1) - 1
