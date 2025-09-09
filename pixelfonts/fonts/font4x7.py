@@ -1,4 +1,14 @@
-class Font4x7:
+#!/usr/bin/env python3
+"""
+Font4x7 class for 4x7 pixel bitmap font.
+Implements numerals 0-9 in a 4x7 pixel grid.
+"""
+
+from ..basefont import BaseFont
+
+class Font4x7(BaseFont):
+    """4x7 pixel bitmap font for numerals"""
+    
     WIDTH = 4
     HEIGHT = 7
     FONT = {
@@ -113,34 +123,6 @@ class Font4x7:
         ]
     }
 
-    def __init__(self, region_width, region_height, pixel_func):
-        self.region_width = region_width
-        self.region_height = region_height
-        self.pixel_func = pixel_func
-
-    def _safe_pixel(self, x, y, *args, **kwargs):
-        if 0 <= x < self.region_width and 0 <= y < self.region_height:
-            self.pixel_func(x, y, *args, **kwargs)
-
-    # Draw a character as long as any part of the character is in the display region
-    def draw_char(self, char, x_offset, y_offset, *args, **kwargs):
-        if char not in self.FONT:
-            raise ValueError(f"Character '{char}' not found in font.")
-
-        if x_offset + self.WIDTH < 0 or y_offset + self.HEIGHT < 0:
-            return
-        elif x_offset > self.region_width or y_offset > self.region_height:
-            return
-        
-        for y, row in enumerate(self.FONT[char]):
-            for x, col in enumerate(row):
-                if col == '#':
-                    self._safe_pixel(x + x_offset, y + y_offset, *args, **kwargs)
-
-    def text(self, string, x_offset, y_offset, *args, **kwargs):
-        for i, char in enumerate(string):
-            self.draw_char(char, x_offset + i * (self.WIDTH + 1), y_offset, *args, **kwargs)
-
 if __name__ == "__main__":
     import PixelKit as kit
     import time
@@ -157,22 +139,29 @@ if __name__ == "__main__":
     # Calculate the total width of the text
     text_width = len(SCROLL_TEXT) * (font.WIDTH + 1) - 1  # -1 because we don't need spacing after the last char
 
-    # Infinite scrolling loop
-    position = DISPLAY_WIDTH  # Start from the right edge
-    
-    while True:
-        kit.clear()
+    try:
+        # Infinite scrolling loop
+        position = DISPLAY_WIDTH  # Start from the right edge
         
-        # Draw the text at the current position
-        font.text(SCROLL_TEXT, position, 0, COLOR)
-        kit.render()
-        
-        # Move the text position left by one pixel
-        position -= 1
-        
-        # If the text has scrolled completely off the left edge, reset to the right
-        if position < -text_width:
-            position = DISPLAY_WIDTH
+        while True:
+            kit.clear()
             
-        # Small delay to control scroll speed
-        time.sleep(SCROLL_SPEED)
+            # Draw the text at the current position
+            font.text(SCROLL_TEXT, position, 0, COLOR)
+            kit.render()
+            
+            # Move the text position left by one pixel
+            position -= 1
+            
+            # If the text has scrolled completely off the left edge, reset to the right
+            if position < -text_width:
+                position = DISPLAY_WIDTH
+                
+            # Small delay to control scroll speed
+            time.sleep(SCROLL_SPEED)
+            
+    except KeyboardInterrupt:
+        # Allow for clean exit with Ctrl+C
+        print("Scrolling stopped")
+        kit.clear()
+        kit.render()
