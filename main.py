@@ -76,7 +76,7 @@ def display_sensor_data(data):
         age = time_stamp - last_seen_stamp
 
         pm25 = sensor.get("pm2.5")
-        confidence = sensor.get("confidence")
+        # confidence = sensor.get("confidence", None)
 
         print("\n=== PurpleAir Sensor Data ===")
         print(f"Sensor Updated: {last_seen} (UTC)")
@@ -88,7 +88,7 @@ def display_sensor_data(data):
         print("\n--- Air Quality (PM2.5) ---")
         print(f"Current pm2.5: {pm25} µg/m³")
         print(f"Current AQI from pm2.5: {purpleair.aqiFromPM(pm25)}")
-        print(f"Confidence: {confidence}%")
+        # print(f"Confidence: {confidence}%")
         print("================================\n")
 
     except KeyError as e:
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     METADATA_FIELDS = ["name", "latitude", "longitude", "altitude", "last_seen"]
     # AIR_QUALITY_FIELDS = ["pm2.5", "confidence", "humidity", "temperature", "pressure"]
-    AIR_QUALITY_FIELDS = ["pm2.5", "confidence", "last_seen"]
+    AIR_QUALITY_FIELDS = ["pm2.5", "last_seen"]
 
     sensor_metadata = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"], METADATA_FIELDS)
     print(sensor_metadata)
