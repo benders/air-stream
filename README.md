@@ -9,7 +9,7 @@
 
 This command will copy all files, then reset the device and leave the serial connection attached. To leave the connection, press `ctl-x`. 
 
-`mpremote cp -r *.py lib : + reset repl`
+`mpremote cp -r boot.py config.py main.py lib : + reset repl`
 
 ## Connect PixelKit as a serial device
 1. Install VCP driver from https://ftdichip.com/drivers/vcp-drivers/
