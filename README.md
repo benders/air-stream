@@ -9,7 +9,7 @@
 
 This command will copy all files, then reset the device and leave the serial connection attached. To leave the connection, press `ctl-x`. 
 
-`mpremote cp -r *.py lib pixelfonts : + reset repl`
+`mpremote cp -r *.py lib : + reset repl`
 
 ## Connect PixelKit as a serial device
 1. Install VCP driver from https://ftdichip.com/drivers/vcp-drivers/
@@ -42,10 +42,3 @@ micropython -m mip install github:benders/micropython-pixelfonts --target lib
 # Install stubs for a specific version.
 pip install -U micropython-esp32-stubs~=1.26.0 --target typings --no-user
 ```
-
-## External libraries
-* https://github.com/adafruit/micropython-adafruit-bitmap-font/blob/master/bitmapfont.py
-* mpremote mip install ntptime
-
-
-
