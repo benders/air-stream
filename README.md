@@ -28,6 +28,15 @@ esptool erase_flash
 esptool write_flash 0x1000 ~/Downloads/ESP32_GENERIC-20250809-v1.26.0.bin
 ```
 
+## Pixelfont library
+
+Uses the pixelfonts package from https://github.com/benders/micropython-pixelfonts
+
+Library can be updated with:
+```sh
+micropython -m mip install github:benders/micropython-pixelfonts --target lib
+```
+
 ## Install MicroPython Stubs
 ```sh
 # Install stubs for a specific version.
