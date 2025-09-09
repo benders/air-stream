@@ -5,14 +5,13 @@ import urandom
 
 # Local libraries
 import PixelKit as kit
-import bitmapfont
-import ntptime
+# import ntptime
 
 # Custom code
 import config
 import purpleair
 import utils
-
+from pixelfonts import Font4x7
 
 def fetch_dial():
     dial = kit.dial.read()
@@ -107,8 +106,7 @@ if __name__ == "__main__":
     # Initialize the RTC
     # ntptime.settime()
 
-    bf = bitmapfont.BitmapFont(kit.WIDTH, kit.HEIGHT, kit.set_pixel)
-    bf.init()
+    bf = Font4x7(kit.WIDTH, kit.HEIGHT, kit.set_pixel)
 
     METADATA_FIELDS = ["name", "latitude", "longitude", "altitude", "last_seen"]
     # AIR_QUALITY_FIELDS = ["pm2.5", "confidence", "humidity", "temperature", "pressure"]
