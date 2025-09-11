@@ -2,3 +2,6 @@
 .vscode/
 typings/
 config.py
+__pycache__
+.pytest_cache/
+.coverage

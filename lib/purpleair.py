@@ -73,9 +73,9 @@ def fetch_sensor_data(api_key, sensor_id, field_list):
 
 # Convert US AQI from raw pm2.5 data
 def aqiFromPM(pm):
-    if not float(pm):
-        return "-"
     if pm == 'undefined':
+        return "-"
+    if not float(pm):
         return "-"
     if pm < 0:
         return pm

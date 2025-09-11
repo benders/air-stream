@@ -42,3 +42,55 @@ micropython -m mip install github:benders/micropython-pixelfonts --target lib
 # Install stubs for a specific version.
 pip install -U micropython-esp32-stubs~=1.26.0 --target typings --no-user
 ```
+
+## Running Tests
+
+The project uses pytest for unit testing. Tests are located in the `tests/` directory.
+
+### Setting up for testing
+
+1. Install development dependencies:
+   ```sh
+   pip install -r requirements-dev.txt
+   ```
+
+2. Make sure you are in the project root directory.
+
+### Running all tests
+
+```sh
+pytest
+```
+
+### Running specific tests
+
+To run tests for a specific module:
+```sh
+pytest tests/test_utils.py
+pytest tests/test_purpleair.py
+```
+
+To run a specific test case:
+```sh
+pytest tests/test_utils.py::TestFormatTime
+pytest tests/test_purpleair.py::TestUrlEncode
+```
+
+To run a specific test method:
+```sh
+pytest tests/test_utils.py::TestFormatTime::test_format_time_8_tuple
+```
+
+### Test coverage
+
+To run tests with coverage report:
+```sh
+pytest --cov=lib
+```
+
+## Test Organization
+
+- `tests/test_utils.py`: Tests for utility functions in the `utils.py` module.
+- `tests/test_purpleair.py`: Tests for PurpleAir API interaction and AQI calculations in the `purpleair.py` module.
+
+Test cases are organized by function or logical group of functions within each test file.
