@@ -11,6 +11,7 @@ import PixelKit as kit
 import config
 import purpleair
 import utils
+import wifi
 from pixelfonts import Font4x7
 
 def fetch_dial():
@@ -34,6 +35,11 @@ def screen_test():
             kit.set_pixel(w,h,row_color)
         kit.render()
         time.sleep(0.1)
+
+def show_wifi_logo(color=(0x10, 0x10, 0x10)):
+    kit.clear()
+    wifi.draw_logo(3, 0, kit.set_pixel, color)
+    kit.render()
 
 def adjust_color(brightness: float, color: tuple) -> tuple:
     if not 0 <= brightness <= 1.0:
@@ -102,12 +108,38 @@ def display_sensor_data(data):
         print(f"Error parsing sensor metadata: {e}")
         # Continue even if we can't display the metadata
 
+# Connect to the network
+def connect_to_wifi():
+    print("Starting network connection...")
+
+    # Display white logo
+    show_wifi_logo((0x10, 0x10, 0x10))
+
+    # Attempt to connect to Wi-Fi forever
+    WIFI_RETRY_DELAY = 15
+    while True:
+        try:
+            wifi.do_connect()
+        except Exception as e:
+            print(f"Error connecting to Wi-Fi: {e}")
+
+        if wifi.isconnected():
+            print("Connection successful!")
+            show_wifi_logo((0x0, 0x0, 0x10)) # Blue logo
+            time.sleep(1)
+            break
+        else:
+            print(f"Connection failed, retrying in {WIFI_RETRY_DELAY} seconds...")
+            show_wifi_logo((0x10, 0x0, 0x0)) # Red logo
+            time.sleep(WIFI_RETRY_DELAY)
+            show_wifi_logo((0x0, 0x0, 0x0)) # Black logo
+
 #
 # Initialize, then run forever
 #
 
 if __name__ == "__main__":
-    screen_test()
+    connect_to_wifi()
 
     # Initialize the RTC
     # ntptime.settime()
@@ -125,6 +157,9 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error fetching sensor metadata: {e}")
         # Continue with the program even if we can't get the initial metadata
+    
+    # Display screen test AFTER initial Metadata fetch
+    screen_test()
 
     UPDATE_DELAY_SEC = 120
     deadline = 0
@@ -159,7 +194,7 @@ if __name__ == "__main__":
 
         color = adjust_color(fetch_dial(), raw_color)
 
-        value_string = "%3d" % aqi if aqi is not None else "---"  # Blank if aqi is None (error)
+        value_string = "%3d" % aqi if aqi is not None else " --"  # Blank if aqi is None (error)
         kit.clear()
         bf.text(value_string, 0, 0, color)
         kit.render()
