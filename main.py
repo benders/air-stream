@@ -154,12 +154,12 @@ if __name__ == "__main__":
                 deadline = time.ticks_add(time.ticks_ms(), 30 * 1000)  # Retry after 30 seconds
                 print(f"Will retry in 30 seconds")
                 # Set blank display on error
-                raw_color = purpleair.WHITE
-                aqi = 0  # Blank display
+                raw_color = purpleair.RED
+                aqi = None  # Blank display
 
         color = adjust_color(fetch_dial(), raw_color)
 
-        value_string = "%3d" % aqi if aqi != 0 else "   "  # Blank if aqi is 0 (error)
+        value_string = "%3d" % aqi if aqi is not None else "---"  # Blank if aqi is None (error)
         kit.clear()
         bf.text(value_string, 0, 0, color)
         kit.render()
