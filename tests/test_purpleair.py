@@ -115,8 +115,7 @@ class TestFetchSensorDataFunction(unittest.TestCase):
         self.assertEqual(result["data"]["confidence"], 95)
     
     @patch('purpleair.urequests')
-    @patch('purpleair.sys')
-    def test_fetch_sensor_data_api_error(self, mock_sys, mock_urequests):
+    def test_fetch_sensor_data_api_error(self, mock_urequests):
         """Test API request with error response"""
         # Mock the error response
         mock_response = MagicMock()
@@ -124,24 +123,25 @@ class TestFetchSensorDataFunction(unittest.TestCase):
         mock_response.text = "Unauthorized"
         mock_urequests.get.return_value = mock_response
         
-        # Call the function with test parameters
-        fetch_sensor_data("invalid_api_key", 12345, ["pm2.5"])
+        # Call the function with test parameters - should raise an exception instead of sys.exit
+        with self.assertRaises(Exception) as context:
+            fetch_sensor_data("invalid_api_key", 12345, ["pm2.5"])
         
-        # Verify that sys.exit was called
-        mock_sys.exit.assert_called_once_with(1)
+        # Verify that an appropriate error message is part of the exception
+        self.assertIn("API request failed", str(context.exception))
     
     @patch('purpleair.urequests')
-    @patch('purpleair.sys')
-    def test_fetch_sensor_data_value_error(self, mock_sys, mock_urequests):
-        """Test API request with ValueError"""
+    def test_fetch_sensor_data_value_error(self, mock_urequests):
+        """Test API request with ValueError (JSON parsing error)"""
         # Mock the request to raise ValueError
         mock_urequests.get.side_effect = ValueError("Invalid JSON")
         
-        # Call the function with test parameters
-        fetch_sensor_data("test_api_key", 12345, ["pm2.5"])
+        # Call the function with test parameters - should raise an exception instead of sys.exit
+        with self.assertRaises(Exception) as context:
+            fetch_sensor_data("test_api_key", 12345, ["pm2.5"])
         
-        # Verify that sys.exit was called
-        mock_sys.exit.assert_called_once_with(1)
+        # Verify that an appropriate error message is part of the exception
+        self.assertIn("Request error", str(context.exception))
     
     def test_fetch_sensor_data_invalid_field_list(self):
         """Test with invalid field_list parameter"""
@@ -343,8 +343,7 @@ class TestFetchSensorData(unittest.TestCase):
         self.assertEqual(result["data"]["confidence"], 95)
     
     @patch('purpleair.urequests')
-    @patch('purpleair.sys')
-    def test_fetch_sensor_data_api_error(self, mock_sys, mock_urequests):
+    def test_fetch_sensor_data_api_error(self, mock_urequests):
         """Test API request with error response"""
         # Mock the error response
         mock_response = MagicMock()
@@ -352,26 +351,40 @@ class TestFetchSensorData(unittest.TestCase):
         mock_response.text = "Unauthorized"
         mock_urequests.get.return_value = mock_response
         
-        # Call the function with test parameters
-        fetch_sensor_data("invalid_api_key", 12345, ["pm2.5"])
+        # Call the function with test parameters - should raise an exception instead of sys.exit
+        with self.assertRaises(Exception) as context:
+            fetch_sensor_data("invalid_api_key", 12345, ["pm2.5"])
         
-        # Verify that sys.exit was called
-        mock_sys.exit.assert_called_once_with(1)
+        # Verify that an appropriate error message is part of the exception
+        self.assertIn("API request failed", str(context.exception))
     
     @patch('purpleair.urequests')
-    @patch('purpleair.sys')
-    def test_fetch_sensor_data_value_error(self, mock_sys, mock_urequests):
-        """Test API request with ValueError"""
+    def test_fetch_sensor_data_value_error(self, mock_urequests):
+        """Test API request with ValueError (JSON parsing error)"""
         # Mock the request to raise ValueError
         mock_urequests.get.side_effect = ValueError("Invalid JSON")
         
-        # Call the function with test parameters
-        fetch_sensor_data("test_api_key", 12345, ["pm2.5"])
+        # Call the function with test parameters - should raise an exception instead of sys.exit
+        with self.assertRaises(Exception) as context:
+            fetch_sensor_data("test_api_key", 12345, ["pm2.5"])
         
-        # Verify that sys.exit was called
-        mock_sys.exit.assert_called_once_with(1)
+        # Verify that an appropriate error message is part of the exception
+        self.assertIn("Request error", str(context.exception))
     
     def test_fetch_sensor_data_invalid_field_list(self):
         """Test with invalid field_list parameter"""
         with self.assertRaises(ValueError):
             fetch_sensor_data("test_api_key", 12345, 123)  # field_list should be list or string
+            
+    @patch('purpleair.urequests')
+    def test_fetch_sensor_data_network_error(self, mock_urequests):
+        """Test API request with network connectivity error"""
+        # Mock urequests.get to raise an OSError (network connectivity issue)
+        mock_urequests.get.side_effect = OSError("Network connection failed")
+        
+        # Call the function with test parameters - should raise an exception
+        with self.assertRaises(Exception) as context:
+            fetch_sensor_data("test_api_key", 12345, ["pm2.5"])
+        
+        # Verify that an appropriate error message is part of the exception
+        self.assertIn("Network error", str(context.exception))

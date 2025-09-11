@@ -54,15 +54,18 @@ def display_sensor_metadata(data):
         print(f"Sensor Updated: {last_seen} (UTC)")
         print(f"Sensor Name: {name}")
         print("\n--- Location ---")
-        print(f"Latitude: {sensor.get("latitude")}")
-        print(f"Longitude: {sensor.get("longitude")}")
-        print(f"Altitude: {sensor.get("altitude")} meters")
+        print(f"Latitude: {sensor.get('latitude')}")
+        print(f"Longitude: {sensor.get('longitude')}")
+        print(f"Altitude: {sensor.get('altitude')} meters")
         print("================================\n")
 
     except KeyError as e:
         print(f"Error parsing API response: {e}")
         print("Could not parse all sensor data. Response format may have changed.")
         print("Raw data:", json.dumps(data, indent=2))
+    except Exception as e:
+        print(f"Error parsing sensor metadata: {e}")
+        # Continue even if we can't display the metadata
 
 
 def display_sensor_data(data):
@@ -95,6 +98,9 @@ def display_sensor_data(data):
         print(f"Error parsing API response: {e}")
         print("Could not parse all sensor data. Response format may have changed.")
         print("Raw data:", json.dumps(data, indent=2))
+    except Exception as e:
+        print(f"Error parsing sensor metadata: {e}")
+        # Continue even if we can't display the metadata
 
 #
 # Initialize, then run forever
@@ -112,9 +118,13 @@ if __name__ == "__main__":
     # AIR_QUALITY_FIELDS = ["pm2.5", "confidence", "humidity", "temperature", "pressure"]
     AIR_QUALITY_FIELDS = ["pm2.5", "last_seen"]
 
-    sensor_metadata = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"], METADATA_FIELDS)
-    print(sensor_metadata)
-    display_sensor_metadata(sensor_metadata)
+    try:
+        sensor_metadata = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"], METADATA_FIELDS)
+        print(sensor_metadata)
+        display_sensor_metadata(sensor_metadata)
+    except Exception as e:
+        print(f"Error fetching sensor metadata: {e}")
+        # Continue with the program even if we can't get the initial metadata
 
     UPDATE_DELAY_SEC = 120
     deadline = 0
@@ -125,22 +135,31 @@ if __name__ == "__main__":
     while True:
         # Refresh the sensor data if it is stale
         if time.ticks_diff(time.ticks_ms(), deadline) > 0:
-            sensor_data = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"], AIR_QUALITY_FIELDS)
-            print(sensor_data)
-            display_sensor_data(sensor_data)
-            sensor = sensor_data.get("sensor", {})
-            pm25 = sensor.get("pm2.5")
-            aqi = purpleair.aqiFromPM(pm25)
-            raw_color = purpleair.aqiColor(aqi)
+            try:
+                sensor_data = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"], AIR_QUALITY_FIELDS)
+                print(sensor_data)
+                display_sensor_data(sensor_data)
+                sensor = sensor_data.get("sensor", {})
+                pm25 = sensor.get("pm2.5")
+                aqi = purpleair.aqiFromPM(pm25)
+                raw_color = purpleair.aqiColor(aqi)
 
-            # Set new deadline
-            deadline = time.ticks_add(time.ticks_ms(), UPDATE_DELAY_SEC * 1000)
-            deadline = time.ticks_add(deadline, urandom.randrange(0, 30 * 1000))
-            print(f"Update in {time.ticks_diff(deadline, time.ticks_ms()) / 1000} seconds")
+                # Set new deadline
+                deadline = time.ticks_add(time.ticks_ms(), UPDATE_DELAY_SEC * 1000)
+                deadline = time.ticks_add(deadline, urandom.randrange(0, 30 * 1000))
+                print(f"Update in {time.ticks_diff(deadline, time.ticks_ms()) / 1000} seconds")
+            except Exception as e:
+                print(f"Error fetching sensor data: {e}")
+                # Set a shorter deadline for retry on error
+                deadline = time.ticks_add(time.ticks_ms(), 30 * 1000)  # Retry after 30 seconds
+                print(f"Will retry in 30 seconds")
+                # Set blank display on error
+                raw_color = purpleair.WHITE
+                aqi = 0  # Blank display
 
         color = adjust_color(fetch_dial(), raw_color)
 
-        value_string = "%3d" % aqi
+        value_string = "%3d" % aqi if aqi != 0 else "   "  # Blank if aqi is 0 (error)
         kit.clear()
         bf.text(value_string, 0, 0, color)
         kit.render()

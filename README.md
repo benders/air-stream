@@ -94,3 +94,34 @@ pytest --cov=lib
 - `tests/test_purpleair.py`: Tests for PurpleAir API interaction and AQI calculations in the `purpleair.py` module.
 
 Test cases are organized by function or logical group of functions within each test file.
+
+## Error Handling
+
+The application is designed to be resilient against various types of errors:
+
+### Network Error Handling
+
+- **API Errors**: When the PurpleAir API returns error status codes, the application will log the error, display a blank screen, and retry after a shorter timeout.
+- **Network Connectivity**: If network connectivity issues occur, the application catches the errors, logs them, and continues operation without crashing.
+- **JSON Parsing Errors**: If response data cannot be parsed, the application handles the error gracefully.
+
+### Main Loop Resilience
+
+- The main loop is designed to never exit due to errors.
+- If sensor data cannot be retrieved, the display shows a blank screen instead of invalid data.
+- The system automatically retries failed operations after a short delay.
+- All error states are logged to the console for debugging.
+
+### Testing Error Conditions
+
+The test suite includes comprehensive tests for error conditions:
+- API error responses
+- Network connectivity issues
+- Data parsing problems
+
+Run the error handling tests with:
+```sh
+pytest tests/test_purpleair.py::TestFetchSensorData::test_fetch_sensor_data_api_error
+pytest tests/test_purpleair.py::TestFetchSensorData::test_fetch_sensor_data_network_error
+pytest tests/test_purpleair.py::TestFetchSensorData::test_fetch_sensor_data_value_error
+```

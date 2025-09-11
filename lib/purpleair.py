@@ -35,9 +35,14 @@ def fetch_sensor_data(api_key, sensor_id, field_list):
     Args:
         api_key (str): PurpleAir API key
         sensor_id (str or int): ID of the sensor to query
+        field_list (list or str): List of fields to retrieve
 
     Returns:
         dict: Sensor data in JSON format
+        
+    Raises:
+        ValueError: If field_list is not a list or string
+        Exception: For API errors, network errors, or data parsing issues
     """
     base_url = "https://api.purpleair.com/v1"
     endpoint = f"/sensors/{sensor_id}"
@@ -65,11 +70,21 @@ def fetch_sensor_data(api_key, sensor_id, field_list):
         if response.status_code == 200:
             return response.json()
         else:
-            print(f"API request failed with status code {response.status_code}: {response.text}")
-            sys.exit(1)
+            error_msg = f"API request failed with status code {response.status_code}: {response.text}"
+            print(error_msg)
+            raise Exception(error_msg)
     except ValueError as e:
-        print(f"Request error: {e}")
-        sys.exit(1)
+        error_msg = f"Request error: {e}"
+        print(error_msg)
+        raise Exception(error_msg)
+    except OSError as e:
+        error_msg = f"Network error: {e}"
+        print(error_msg)
+        raise Exception(error_msg)
+    except Exception as e:
+        error_msg = f"Unexpected error: {e}"
+        print(error_msg)
+        raise Exception(error_msg)
 
 # Convert US AQI from raw pm2.5 data
 def aqiFromPM(pm):
