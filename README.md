@@ -24,8 +24,8 @@ More information at https://docs.micropython.org/en/latest/esp32/tutorial/intro.
 
 Example:
 ```sh
-esptool erase_flash
-esptool write_flash 0x1000 ~/Downloads/ESP32_GENERIC-20250809-v1.26.0.bin
+esptool erase-flash
+esptool write-flash 0x1000 ~/Downloads/ESP32_GENERIC-20250911-v1.26.1.bin
 ```
 
 ## Pixelfont library
