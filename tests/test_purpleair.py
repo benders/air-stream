@@ -52,8 +52,8 @@ class TestAqiColorFunction(unittest.TestCase):
         self.assertEqual(result, GREEN)
     
     def test_color_white(self):
-        """Test color for AQI = 0 (undefined)"""
-        result = aqiColor(0)
+        """Test color for AQI = -1 (undefined)"""
+        result = aqiColor(-1)
         self.assertEqual(result, WHITE)
 
 class TestCalcAQIFunction(unittest.TestCase):
