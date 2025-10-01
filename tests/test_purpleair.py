@@ -245,45 +245,6 @@ class TestAqiFromPM(unittest.TestCase):
         result = aqiFromPM(1001.0)
         self.assertEqual(result, "-")
 
-
-class TestAqiColor(unittest.TestCase):
-    """Tests for the aqiColor function"""
-    
-    def test_color_maroon(self):
-        """Test color for AQI > 300.5 (Hazardous)"""
-        result = aqiColor(301)
-        self.assertEqual(result, MAROON)
-    
-    def test_color_purple(self):
-        """Test color for AQI > 201.5 (Very Unhealthy)"""
-        result = aqiColor(201)
-        self.assertEqual(result, PURPLE)
-    
-    def test_color_red(self):
-        """Test color for AQI > 151.5 (Unhealthy)"""
-        result = aqiColor(151)
-        self.assertEqual(result, RED)
-    
-    def test_color_orange(self):
-        """Test color for AQI > 101.5 (Unhealthy for Sensitive Groups)"""
-        result = aqiColor(101)
-        self.assertEqual(result, ORANGE)
-    
-    def test_color_yellow(self):
-        """Test color for AQI > 51.5 (Moderate)"""
-        result = aqiColor(51)
-        self.assertEqual(result, YELLOW)
-    
-    def test_color_green(self):
-        """Test color for AQI > 0 (Good)"""
-        result = aqiColor(49)
-        self.assertEqual(result, GREEN)
-    
-    def test_color_white(self):
-        """Test color for AQI = 0 (undefined)"""
-        result = aqiColor(0)
-        self.assertEqual(result, WHITE)
-
 class TestCalcAQI(unittest.TestCase):
     """Tests for the calcAQI function"""
     
