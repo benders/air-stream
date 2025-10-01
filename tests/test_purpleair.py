@@ -256,27 +256,27 @@ class TestAqiColor(unittest.TestCase):
     
     def test_color_purple(self):
         """Test color for AQI > 201.5 (Very Unhealthy)"""
-        result = aqiColor(202)
+        result = aqiColor(201)
         self.assertEqual(result, PURPLE)
     
     def test_color_red(self):
         """Test color for AQI > 151.5 (Unhealthy)"""
-        result = aqiColor(152)
+        result = aqiColor(151)
         self.assertEqual(result, RED)
     
     def test_color_orange(self):
         """Test color for AQI > 101.5 (Unhealthy for Sensitive Groups)"""
-        result = aqiColor(102)
+        result = aqiColor(101)
         self.assertEqual(result, ORANGE)
     
     def test_color_yellow(self):
         """Test color for AQI > 51.5 (Moderate)"""
-        result = aqiColor(52)
+        result = aqiColor(51)
         self.assertEqual(result, YELLOW)
     
     def test_color_green(self):
         """Test color for AQI > 0 (Good)"""
-        result = aqiColor(50)
+        result = aqiColor(49)
         self.assertEqual(result, GREEN)
     
     def test_color_white(self):

@@ -125,16 +125,15 @@ def aqiFromPM(pm):
         return 'undefined'
 
 def aqiColor(aqi):
-    aqi = round(aqi)
     if aqi > 300.5:
         return MAROON
-    elif aqi > 201.5:
+    elif aqi > 200.5:
         return PURPLE
-    elif aqi > 151.5:
+    elif aqi > 150.5:
         return RED
-    elif aqi > 101.5:
+    elif aqi > 100.5:
         return ORANGE
-    elif aqi > 51.5:
+    elif aqi > 50.5:
         return YELLOW
     elif aqi > 0:
         return GREEN
