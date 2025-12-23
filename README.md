@@ -37,13 +37,7 @@ Library can be updated with:
 micropython -m mip install github:benders/micropython-pixelfonts --target lib
 ```
 
-## Install MicroPython Stubs
-```sh
-# Install stubs for a specific version.
-pip install -U micropython-esp32-stubs~=1.26.0 --target typings --no-user
-```
-
-## Running Tests
+## Stubs and Tests
 
 The project uses pytest for unit testing. Tests are located in the `tests/` directory.
 
@@ -51,7 +45,8 @@ The project uses pytest for unit testing. Tests are located in the `tests/` dire
 
 1. Install development dependencies:
    ```sh
-   pip install -r requirements-dev.txt
+   python -m venv .venv
+   ./venv/bin/pip install -r requirements-dev.txt
    ```
 
 2. Make sure you are in the project root directory.
