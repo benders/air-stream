@@ -69,7 +69,7 @@ def display_sensor_metadata(data):
     except KeyError as e:
         print(f"Error parsing API response: {e}")
         print("Could not parse all sensor data. Response format may have changed.")
-        print("Raw data:", json.dumps(data, indent=2))
+        print("Raw data:", json.dumps(data))
     except Exception as e:
         print(f"Error parsing sensor metadata: {e}")
         # Continue even if we can't display the metadata
@@ -104,7 +104,7 @@ def display_sensor_data(data):
     except KeyError as e:
         print(f"Error parsing API response: {e}")
         print("Could not parse all sensor data. Response format may have changed.")
-        print("Raw data:", json.dumps(data, indent=2))
+        print("Raw data:", json.dumps(data))
     except Exception as e:
         print(f"Error parsing sensor metadata: {e}")
         # Continue even if we can't display the metadata
@@ -186,6 +186,12 @@ if __name__ == "__main__":
                 deadline = time.ticks_add(time.ticks_ms(), UPDATE_DELAY_SEC * 1000)
                 deadline = time.ticks_add(deadline, urandom.randrange(0, 30 * 1000))
                 print(f"Update in {time.ticks_diff(deadline, time.ticks_ms()) / 1000} seconds")
+            except OSError as e:
+                print(f"OSError while fetching sensor data: {e}")
+                print("Will reset in 30 seconds...")
+                time.sleep(30)
+                import machine
+                machine.reset()
             except Exception as e:
                 print(f"Error fetching sensor data: {e}")
                 # Set a shorter deadline for retry on error
