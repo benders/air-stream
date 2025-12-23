@@ -2,6 +2,7 @@
 import time
 import json
 import urandom
+import urequests
 
 # Local libraries
 import PixelKit as kit
@@ -150,8 +151,10 @@ if __name__ == "__main__":
     # AIR_QUALITY_FIELDS = ["pm2.5", "confidence", "humidity", "temperature", "pressure"]
     AIR_QUALITY_FIELDS = ["pm2.5", "last_seen"]
 
+    purpleair_client = purpleair.PurpleAirClient(urequests, config.CONFIG["api_key"])
+
     try:
-        sensor_metadata = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"], METADATA_FIELDS)
+        sensor_metadata = purpleair_client.fetch_sensor_data(config.CONFIG["sensor_id"], METADATA_FIELDS)
         print(sensor_metadata)
         display_sensor_metadata(sensor_metadata)
     except Exception as e:
@@ -171,7 +174,7 @@ if __name__ == "__main__":
         # Refresh the sensor data if it is stale
         if time.ticks_diff(time.ticks_ms(), deadline) > 0:
             try:
-                sensor_data = purpleair.fetch_sensor_data(config.CONFIG["api_key"], config.CONFIG["sensor_id"], AIR_QUALITY_FIELDS)
+                sensor_data = purpleair_client.fetch_sensor_data(config.CONFIG["sensor_id"], AIR_QUALITY_FIELDS)
                 print(sensor_data)
                 display_sensor_data(sensor_data)
                 sensor = sensor_data.get("sensor", {})
