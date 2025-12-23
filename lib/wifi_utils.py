@@ -2,7 +2,7 @@ import network
 import config
 import time
 
-def draw_logo(x0, y0, pixel_function, *args, **kwargs):
+def draw_logo(x0, y0, pixel_function, *args, **kwargs) -> None:
     WIFI_LOGO = [
         '..######..',
         '.########.',
@@ -23,7 +23,7 @@ def isconnected():
     wlan = network.WLAN(network.STA_IF)
     return wlan.isconnected()
 
-def do_connect():
+def do_connect() -> bool:
     # Constants for connection
     MAX_RETRIES = 10        # Number of retries before resetting WLAN
     SHORT_DELAY = 1000      # Milliseconds between connection attempts

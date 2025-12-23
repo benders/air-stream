@@ -12,7 +12,7 @@ import PixelKit as kit
 import config
 import purpleair
 import utils
-import wifi
+import wifi_utils
 from pixelfonts import Font4x7
 
 def fetch_dial():
@@ -39,7 +39,7 @@ def screen_test():
 
 def show_wifi_logo(color=(0x10, 0x10, 0x10)):
     kit.clear()
-    wifi.draw_logo(3, 0, kit.set_pixel, color)
+    wifi_utils.draw_logo(3, 0, kit.set_pixel, color)
     kit.render()
 
 def adjust_color(brightness: float, color: tuple) -> tuple:
@@ -120,11 +120,11 @@ def connect_to_wifi():
     WIFI_RETRY_DELAY = 15
     while True:
         try:
-            wifi.do_connect()
+            wifi_utils.do_connect()
         except Exception as e:
             print(f"Error connecting to Wi-Fi: {e}")
 
-        if wifi.isconnected():
+        if wifi_utils.isconnected():
             print("Connection successful!")
             show_wifi_logo((0x0, 0x0, 0x10)) # Blue logo
             time.sleep(1)
