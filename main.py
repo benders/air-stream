@@ -7,13 +7,13 @@ import urequests
 
 # Local libraries
 import PixelKit as kit
-# import ntptime
 
 # Custom code
 import config
 import purpleair
 import utils
 import wifi_utils
+
 from pixelfonts import Font4x7
 
 def fetch_dial():
@@ -76,40 +76,6 @@ def display_sensor_metadata(data):
         # Continue even if we can't display the metadata
 
 
-def display_sensor_data(data):
-    try:
-        sensor = data.get("sensor", {})
-        time_stamp = data.get("time_stamp")
-
-        last_seen_stamp = sensor.get("last_seen")
-        last_seen = utils.format_time(time.gmtime(last_seen_stamp))
-
-        age = time_stamp - last_seen_stamp
-
-        pm25 = sensor.get("pm2.5")
-        # confidence = sensor.get("confidence", None)
-
-        print("\n=== PurpleAir Sensor Data ===")
-        print(f"Sensor Updated: {last_seen} (UTC)")
-        print(f"{age} seconds ago")
-        # print("\n--- Environmental Conditions ---")
-        # print(f"Humidity: {humidity}%")
-        # print(f"Temperature: {temperature}°C")
-        # print(f"Pressure: {pressure} hPa")
-        print("\n--- Air Quality (PM2.5) ---")
-        print(f"Current pm2.5: {pm25} µg/m³")
-        print(f"Current AQI from pm2.5: {purpleair.aqiFromPM(pm25)}")
-        # print(f"Confidence: {confidence}%")
-        print("================================\n")
-
-    except KeyError as e:
-        print(f"Error parsing API response: {e}")
-        print("Could not parse all sensor data. Response format may have changed.")
-        print("Raw data:", json.dumps(data))
-    except Exception as e:
-        print(f"Error parsing sensor metadata: {e}")
-        # Continue even if we can't display the metadata
-
 # Connect to the network
 def connect_to_wifi():
     print("Starting network connection...")
@@ -148,14 +114,13 @@ if __name__ == "__main__":
     connect_to_wifi()
     WATCHDOG.feed()
 
-    # Initialize the RTC
-    # ntptime.settime()
+    # Initialize the bitmap font
+    font = Font4x7(kit.WIDTH, kit.HEIGHT, kit.set_pixel)
 
-    bf = Font4x7(kit.WIDTH, kit.HEIGHT, kit.set_pixel)
-
-    METADATA_FIELDS = ["name", "latitude", "longitude", "altitude", "last_seen"]
-    # AIR_QUALITY_FIELDS = ["pm2.5", "confidence", "humidity", "temperature", "pressure"]
-    AIR_QUALITY_FIELDS = ["pm2.5", "last_seen"]
+    # METADATA_FIELDS = ["name", "latitude", "longitude", "altitude", "last_seen"]
+    METADATA_FIELDS = ["name", "last_seen"]
+    # AIR_QUALITY_FIELDS = ["pm2.5", "confidence", "humidity", "temperature", "pressure", "last_seen"]
+    AIR_QUALITY_FIELDS = ["pm2.5"]
 
     purpleair_client = purpleair.PurpleAirClient(urequests, config.CONFIG["api_key"])
 
@@ -171,7 +136,10 @@ if __name__ == "__main__":
     # Display screen test AFTER initial Metadata fetch
     screen_test()
 
-    UPDATE_DELAY_SEC = 120
+    # Scroll the sensor name across the display
+    display_name = sensor_metadata.get("sensor", {}).get("name", "NAME ERROR").upper()
+    utils.scroll_text(kit, font, display_name, adjust_color(fetch_dial(), purpleair.WHITE), speed=0.1)
+
     deadline = 0
     
     aqi = 999
@@ -183,7 +151,6 @@ if __name__ == "__main__":
             try:
                 sensor_data = purpleair_client.fetch_sensor_data(config.CONFIG["sensor_id"], AIR_QUALITY_FIELDS)
                 print(sensor_data)
-                display_sensor_data(sensor_data)
                 sensor = sensor_data.get("sensor", {})
                 pm25 = sensor.get("pm2.5")
                 aqi = purpleair.aqiFromPM(pm25)
@@ -211,8 +178,8 @@ if __name__ == "__main__":
 
         color = adjust_color(fetch_dial(), raw_color)
 
-        value_string = "%3d" % aqi if aqi is not None else " --"  # Blank if aqi is None (error)
+        value_string = "%3d" % aqi if aqi is not None else "ERR"  # Error if aqi is None
         kit.clear()
-        bf.text(value_string, 0, 0, color)
+        font.text(value_string, 0, 0, color)
         kit.render()
         time.sleep(0.1)
