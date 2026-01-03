@@ -34,7 +34,7 @@ Uses the pixelfonts package from https://github.com/benders/micropython-pixelfon
 
 Library can be updated with:
 ```sh
-micropython -m mip install github:benders/micropython-pixelfonts --target lib
+micropython -m mip install github:benders/micropython-pixelfonts/package-mpy-v6.json --target lib
 ```
 
 ## Stubs and Tests
