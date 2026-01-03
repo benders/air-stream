@@ -1,6 +1,7 @@
 # Standard libraries
 import time
 import json
+import machine
 import urandom
 import urequests
 
@@ -140,7 +141,12 @@ def connect_to_wifi():
 #
 
 if __name__ == "__main__":
+    # Start the watchdog timer
+    UPDATE_DELAY_SEC = 120
+    WATCHDOG = machine.WDT(timeout=int(UPDATE_DELAY_SEC * 2.5 * 1000))
+
     connect_to_wifi()
+    WATCHDOG.feed()
 
     # Initialize the RTC
     # ntptime.settime()
@@ -157,6 +163,7 @@ if __name__ == "__main__":
         sensor_metadata = purpleair_client.fetch_sensor_data(config.CONFIG["sensor_id"], METADATA_FIELDS)
         print(sensor_metadata)
         display_sensor_metadata(sensor_metadata)
+        WATCHDOG.feed()
     except Exception as e:
         print(f"Error fetching sensor metadata: {e}")
         # Continue with the program even if we can't get the initial metadata
@@ -186,6 +193,7 @@ if __name__ == "__main__":
                 deadline = time.ticks_add(time.ticks_ms(), UPDATE_DELAY_SEC * 1000)
                 deadline = time.ticks_add(deadline, urandom.randrange(0, 30 * 1000))
                 print(f"Update in {time.ticks_diff(deadline, time.ticks_ms()) / 1000} seconds")
+                WATCHDOG.feed()
             except OSError as e:
                 print(f"OSError while fetching sensor data: {e}")
                 print("Will reset in 30 seconds...")
