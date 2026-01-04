@@ -7,7 +7,6 @@ Tests for purpleair.py module
 import unittest
 import sys
 import os
-import json
 from unittest.mock import patch, MagicMock
 
 # Add the lib directory to the path so we can import modules
@@ -78,82 +77,6 @@ class TestCalcAQIFunction(unittest.TestCase):
         # Test for PM2.5 = 23.75 (mid-point of Moderate range)
         result = calcAQI(23.75, 100, 51, 35.4, 12.1)
         self.assertEqual(result, 76)  # Should be approximately 75.5, rounded to 76
-
-class TestFetchSensorDataFunction(unittest.TestCase):
-    """Tests for the fetch_sensor_data function"""
-    
-    def test_fetch_sensor_data_success(self):
-        """Test successful API request with mocked response"""
-        # Mock the requests library
-        mock_requests = MagicMock()
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            "api_version": "V1.0.11-0.0.38",
-            "data_timestamp": 1617395407,
-            "data": {
-                "sensor_index": 12345,
-                "pm2.5": 10.5,
-                "temperature": 72.5,
-                "humidity": 45.2,
-                "pressure": 1012.3,
-                "confidence": 95
-            }
-        }
-        mock_requests.get.return_value = mock_response
-        
-        # Create client and call fetch_sensor_data
-        client = PurpleAirClient(mock_requests, "test_api_key")
-        result = client.fetch_sensor_data(12345, ["pm2.5", "temperature", "humidity", "pressure", "confidence"])
-        
-        # Verify the function called requests.get with correct parameters
-        mock_requests.get.assert_called_once()
-        call_args = mock_requests.get.call_args[0][0]
-        self.assertTrue("https://api.purpleair.com/v1/sensors/12345" in call_args)
-        self.assertTrue("fields=pm2%2e5%2ctemperature%2chumidity%2cpressure%2cconfidence" in call_args)
-        
-        # Verify the response data
-        self.assertEqual(result["data"]["sensor_index"], 12345)
-        self.assertEqual(result["data"]["pm2.5"], 10.5)
-        self.assertEqual(result["data"]["confidence"], 95)
-    
-    def test_fetch_sensor_data_api_error(self):
-        """Test API request with error response"""
-        # Mock the requests library
-        mock_requests = MagicMock()
-        mock_response = MagicMock()
-        mock_response.status_code = 401
-        mock_response.text = "Unauthorized"
-        mock_requests.get.return_value = mock_response
-        
-        # Create client and call fetch_sensor_data - should raise an exception
-        client = PurpleAirClient(mock_requests, "invalid_api_key")
-        with self.assertRaises(Exception) as context:
-            client.fetch_sensor_data(12345, ["pm2.5"])
-        
-        # Verify that an appropriate error message is part of the exception
-        self.assertIn("API request failed", str(context.exception))
-    
-    def test_fetch_sensor_data_value_error(self):
-        """Test API request with ValueError (JSON parsing error)"""
-        # Mock the requests library to raise ValueError
-        mock_requests = MagicMock()
-        mock_requests.get.side_effect = ValueError("Invalid JSON")
-        
-        # Create client and call fetch_sensor_data - should raise an exception
-        client = PurpleAirClient(mock_requests, "test_api_key")
-        with self.assertRaises(Exception) as context:
-            client.fetch_sensor_data(12345, ["pm2.5"])
-        
-        # Verify that an appropriate error message is part of the exception
-        self.assertIn("ValueError", str(context.exception))
-    
-    def test_fetch_sensor_data_invalid_field_list(self):
-        """Test with invalid field_list parameter"""
-        mock_requests = MagicMock()
-        client = PurpleAirClient(mock_requests, "test_api_key")
-        with self.assertRaises(ValueError):
-            client.fetch_sensor_data(12345, 123)  # field_list should be list or string
 
 class TestUrlEncode(unittest.TestCase):
     """Tests for the url_encode function"""
@@ -256,27 +179,6 @@ class TestAqiFromPM(unittest.TestCase):
         if isinstance(result, (int, float)) and not isinstance(result, str):
             self.assertTrue(result > 500, f"Expected AQI > 500 for PM 1001.0, got {result}")
 
-class TestCalcAQI(unittest.TestCase):
-    """Tests for the calcAQI function"""
-    
-    def test_calc_aqi_lower_bound(self):
-        """Test calcAQI at lower bound of range"""
-        # Test for PM2.5 = 12.1 (lower bound of Moderate range)
-        result = calcAQI(12.1, 100, 51, 35.4, 12.1)
-        self.assertEqual(result, 51)
-    
-    def test_calc_aqi_upper_bound(self):
-        """Test calcAQI at upper bound of range"""
-        # Test for PM2.5 = 35.4 (upper bound of Moderate range)
-        result = calcAQI(35.4, 100, 51, 35.4, 12.1)
-        self.assertEqual(result, 100)
-    
-    def test_calc_aqi_mid_range(self):
-        """Test calcAQI at mid-point of range"""
-        # Test for PM2.5 = 23.75 (mid-point of Moderate range)
-        result = calcAQI(23.75, 100, 51, 35.4, 12.1)
-        self.assertEqual(result, 76)  # Should be approximately 75.5, rounded to 76
-
 class TestFetchSensorData(unittest.TestCase):
     """Tests for the fetch_sensor_data function"""
     
@@ -344,7 +246,7 @@ class TestFetchSensorData(unittest.TestCase):
             client.fetch_sensor_data(12345, ["pm2.5"])
         
         # Verify that an appropriate error message is part of the exception
-        self.assertIn("ValueError", str(context.exception))
+        self.assertIsInstance(context.exception, ValueError)
     
     def test_fetch_sensor_data_invalid_field_list(self):
         """Test with invalid field_list parameter"""
@@ -365,4 +267,4 @@ class TestFetchSensorData(unittest.TestCase):
             client.fetch_sensor_data(12345, ["pm2.5"])
         
         # Verify that an appropriate error message is part of the exception
-        self.assertIn("OSError", str(context.exception))
+        self.assertIsInstance(context.exception, OSError)
